@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { Calculator } from './components/Calculator';
+import React from 'react';
+import { Calculator } from './components/Calculator.tsx';
 
 const App: React.FC = () => {
   return (

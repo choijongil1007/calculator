@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Display } from './Display';
-import { Button } from './Button';
-import { Operation, CalculatorState } from '../types';
+import { Display } from './Display.tsx';
+import { Button } from './Button.tsx';
+import { Operation, CalculatorState } from '../types.ts';
 
 export const Calculator: React.FC = () => {
   const [state, setState] = useState<CalculatorState>({
@@ -111,7 +111,6 @@ export const Calculator: React.FC = () => {
     });
   }, []);
 
-  // Keyboard support
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key >= '0' && e.key <= '9') handleDigit(e.key);
@@ -136,7 +135,6 @@ export const Calculator: React.FC = () => {
 
   return (
     <div className="w-[232px] bg-black/60 backdrop-blur-3xl rounded-xl shadow-2xl border border-white/10 overflow-hidden flex flex-col p-1">
-      {/* MacBook Window Controls (Decorative) */}
       <div className="flex gap-1.5 px-3 pt-2 pb-1">
         <div className="w-2.5 h-2.5 rounded-full bg-[#ff5f56]"></div>
         <div className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]"></div>
