@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
-import { Display } from './Display.tsx';
-import { Button } from './Button.tsx';
-import { Operation, CalculatorState } from '../types.ts';
+import { Display } from './Display';
+import { Button } from './Button';
+import { Operation, CalculatorState } from '../types';
 
 export const Calculator: React.FC = () => {
   const [state, setState] = useState<CalculatorState>({
@@ -134,7 +133,7 @@ export const Calculator: React.FC = () => {
   }, [handleDigit, handleOperation, handleEquals, handleClear, handleDecimal]);
 
   return (
-    <div className="w-[232px] bg-[#1c1c1e]/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 overflow-hidden flex flex-col p-[1px]">
+    <div className="w-[232px] bg-[#1c1c1e] rounded-2xl shadow-2xl border border-white/10 overflow-hidden flex flex-col p-[1px]">
       <div className="flex gap-1.5 px-3 pt-3 pb-1">
         <div className="w-3 h-3 rounded-full bg-[#ff5f56]"></div>
         <div className="w-3 h-3 rounded-full bg-[#ffbd2e]"></div>
