@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 type ButtonVariant = 'number' | 'operator' | 'utility';
@@ -13,15 +12,19 @@ interface ButtonProps {
 
 export const Button: React.FC<ButtonProps> = ({ label, variant, onClick, className = '', active = false }) => {
   const getStyles = () => {
-    const base = "h-[46px] w-full flex items-center justify-center text-xl transition-colors duration-150 active:brightness-125 focus:outline-none select-none";
+    const base = "h-[46px] w-full flex items-center justify-center text-[19px] transition-all duration-75 focus:outline-none select-none";
     
     switch (variant) {
       case 'number':
-        return `${base} bg-[#5e5e5e]/80 text-white hover:bg-[#6e6e6e]/80`;
+        return `${base} bg-[#5e5e5e] text-white active:bg-[#8e8e8e] hover:bg-[#6e6e6e]`;
       case 'operator':
-        return `${base} ${active ? 'bg-white text-[#ff9f0a]' : 'bg-[#ff9f0a] text-white'} hover:brightness-110`;
+        // The active state in macOS swaps colors
+        if (active) {
+          return `${base} bg-white text-[#ff9f0a] border-[1.5px] border-[#ff9f0a]`;
+        }
+        return `${base} bg-[#ff9f0a] text-white active:bg-[#fcc87e] hover:brightness-105`;
       case 'utility':
-        return `${base} bg-[#424242]/80 text-white hover:bg-[#525252]/80`;
+        return `${base} bg-[#424242] text-white active:bg-[#727272] hover:bg-[#525252]`;
       default:
         return base;
     }
@@ -29,7 +32,10 @@ export const Button: React.FC<ButtonProps> = ({ label, variant, onClick, classNa
 
   return (
     <button 
-      onClick={onClick}
+      onClick={(e) => {
+        e.preventDefault();
+        onClick();
+      }}
       className={`${getStyles()} ${className}`}
     >
       {label}

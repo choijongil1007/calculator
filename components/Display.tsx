@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 interface DisplayProps {
@@ -6,38 +5,43 @@ interface DisplayProps {
 }
 
 export const Display: React.FC<DisplayProps> = ({ value }) => {
-  // Format the display value to have commas and handle long numbers
   const formatValue = (val: string) => {
-    if (!val || val === 'NaN' || val === 'Infinity' || val === '-Infinity') return 'Error';
+    if (val === 'NaN') return 'Error';
+    if (val === 'Infinity' || val === '-Infinity') return 'Infinity';
     
-    try {
-      const parts = val.split('.');
-      const num = parseFloat(parts[0]);
-      
-      // Handle very large numbers with scientific notation if needed
-      if (Math.abs(num) > 1e12) {
-        return parseFloat(val).toExponential(5);
-      }
+    const parts = val.split('.');
+    let integerPart = parts[0];
+    const decimalPart = parts.length > 1 ? '.' + parts[1] : '';
 
-      parts[0] = num.toLocaleString(undefined, { maximumFractionDigits: 0 });
-      return parts.join('.');
-    } catch (e) {
-      return 'Error';
+    // Add thousands separators
+    const formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    
+    // Limit total visible characters for aesthetics
+    const combined = formattedInteger + decimalPart;
+    if (combined.length > 12) {
+      const num = parseFloat(val);
+      if (Math.abs(num) > 1e9 || (Math.abs(num) < 1e-7 && num !== 0)) {
+        return num.toExponential(5);
+      }
+      return combined.substring(0, 12);
     }
+    
+    return combined;
   };
 
   const getFontSize = (val: string) => {
-    const len = val.length;
-    if (len <= 7) return 'text-5xl';
-    if (len <= 10) return 'text-4xl';
-    if (len <= 13) return 'text-3xl';
-    return 'text-2xl';
+    const displayVal = formatValue(val);
+    const len = displayVal.length;
+    if (len <= 6) return 'text-[48px]';
+    if (len <= 9) return 'text-[36px]';
+    if (len <= 12) return 'text-[28px]';
+    return 'text-[22px]';
   };
 
   return (
-    <div className="flex-1 flex flex-col justify-end items-end px-4 py-4 min-h-[100px] w-full overflow-hidden">
+    <div className="flex-none flex flex-col justify-end items-end px-4 py-3 h-[90px] w-full overflow-hidden bg-transparent">
       <div 
-        className={`${getFontSize(value)} text-white font-light transition-all duration-100 break-all text-right leading-tight select-all cursor-text w-full`}
+        className={`${getFontSize(value)} text-white font-light tracking-tight transition-all duration-75 whitespace-nowrap text-right leading-none select-text cursor-default w-full`}
       >
         {formatValue(value)}
       </div>

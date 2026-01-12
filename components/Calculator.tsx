@@ -11,28 +11,35 @@ export const Calculator: React.FC = () => {
     overwrite: true,
   });
 
-  const calculate = (prev: number, current: number, op: Operation): number => {
+  const performCalculation = (prev: number, current: number, op: Operation): number => {
+    let result: number;
     switch (op) {
-      case '+': return prev + current;
-      case '-': return prev - current;
-      case '*': return prev * current;
-      case '/': return current === 0 ? NaN : prev / current;
+      case '+': result = prev + current; break;
+      case '-': result = prev - current; break;
+      case '*': result = prev * current; break;
+      case '/': result = current === 0 ? NaN : prev / current; break;
       default: return current;
     }
+    // Handle floating point precision issues (e.g., 0.1 + 0.2)
+    return parseFloat(result.toPrecision(12));
   };
 
   const handleDigit = useCallback((digit: string) => {
-    setState(prev => ({
-      ...prev,
-      display: prev.overwrite ? digit : prev.display === '0' ? digit : prev.display + digit,
-      overwrite: false,
-    }));
+    setState(prev => {
+      if (prev.overwrite) {
+        return { ...prev, display: digit, overwrite: false };
+      }
+      if (prev.display === '0') {
+        return { ...prev, display: digit };
+      }
+      return { ...prev, display: prev.display + digit };
+    });
   }, []);
 
   const handleOperation = useCallback((op: Operation) => {
     setState(prev => {
       const current = parseFloat(prev.display);
-      
+
       if (prev.previousValue === null) {
         return {
           ...prev,
@@ -43,7 +50,7 @@ export const Calculator: React.FC = () => {
       }
 
       if (prev.operation && !prev.overwrite) {
-        const result = calculate(prev.previousValue, current, prev.operation);
+        const result = performCalculation(prev.previousValue, current, prev.operation);
         return {
           ...prev,
           display: String(result),
@@ -66,7 +73,7 @@ export const Calculator: React.FC = () => {
       if (prev.operation === null || prev.previousValue === null) return prev;
       
       const current = parseFloat(prev.display);
-      const result = calculate(prev.previousValue, current, prev.operation);
+      const result = performCalculation(prev.previousValue, current, prev.operation);
       
       return {
         ...prev,
@@ -90,7 +97,7 @@ export const Calculator: React.FC = () => {
   const handleToggleSign = useCallback(() => {
     setState(prev => ({
       ...prev,
-      display: prev.display.startsWith('-') ? prev.display.slice(1) : '-' + prev.display,
+      display: prev.display.startsWith('-') ? prev.display.slice(1) : (prev.display === '0' ? '0' : '-' + prev.display),
     }));
   }, []);
 
@@ -118,13 +125,17 @@ export const Calculator: React.FC = () => {
       if (e.key === '-') handleOperation('-');
       if (e.key === '*') handleOperation('*');
       if (e.key === '/') handleOperation('/');
-      if (e.key === 'Enter' || e.key === '=') handleEquals();
-      if (e.key === 'Escape' || e.key === 'c' || e.key === 'C') handleClear();
+      if (e.key === 'Enter' || e.key === '=') {
+        e.preventDefault();
+        handleEquals();
+      }
+      if (e.key === 'Escape') handleClear();
       if (e.key === 'Backspace') {
-        setState(prev => ({
-          ...prev,
-          display: prev.display.length > 1 ? prev.display.slice(0, -1) : '0',
-        }));
+        setState(prev => {
+          if (prev.overwrite) return prev;
+          const newDisplay = prev.display.length > 1 ? prev.display.slice(0, -1) : '0';
+          return { ...prev, display: newDisplay };
+        });
       }
     };
 
@@ -133,7 +144,8 @@ export const Calculator: React.FC = () => {
   }, [handleDigit, handleOperation, handleEquals, handleClear, handleDecimal]);
 
   return (
-    <div className="w-[232px] bg-[#1c1c1e] rounded-2xl shadow-2xl border border-white/10 overflow-hidden flex flex-col p-[1px]">
+    <div className="w-[232px] bg-[#1c1c1e] rounded-2xl shadow-2xl border border-white/10 overflow-hidden flex flex-col p-[1px] select-none">
+      {/* Top Bar Circles */}
       <div className="flex gap-1.5 px-3 pt-3 pb-1">
         <div className="w-3 h-3 rounded-full bg-[#ff5f56]"></div>
         <div className="w-3 h-3 rounded-full bg-[#ffbd2e]"></div>
@@ -142,8 +154,8 @@ export const Calculator: React.FC = () => {
 
       <Display value={state.display} />
 
-      <div className="grid grid-cols-4 gap-[1px] bg-white/5">
-        <Button label={state.overwrite && state.display === '0' ? 'AC' : 'C'} variant="utility" onClick={handleClear} />
+      <div className="grid grid-cols-4 gap-[1px] bg-black/20">
+        <Button label={state.display === '0' && state.overwrite ? 'AC' : 'C'} variant="utility" onClick={handleClear} />
         <Button label="+/-" variant="utility" onClick={handleToggleSign} />
         <Button label="%" variant="utility" onClick={handlePercent} />
         <Button label="÷" variant="operator" active={state.operation === '/'} onClick={() => handleOperation('/')} />
