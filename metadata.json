@@ -1,0 +1,5 @@
+{
+  "name": "macOS Style Calculator",
+  "description": "A sleek, functional calculator inspired by the macOS aesthetic, supporting arithmetic operations, keyboard input, and responsive design.",
+  "requestFramePermissions": []
+}
