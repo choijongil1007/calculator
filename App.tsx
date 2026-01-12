@@ -4,10 +4,10 @@ import { Calculator } from './components/Calculator.tsx';
 
 const App: React.FC = () => {
   return (
-    <div className="flex items-center justify-center min-h-screen w-full">
+    <div className="calculator-container flex flex-col items-center justify-center w-full h-full">
       <Calculator />
-      <div className="fixed bottom-4 text-white/30 text-xs font-light pointer-events-none select-none">
-        Use keyboard for numbers and operators (Enter for =, Esc for AC)
+      <div className="mt-6 text-white/20 text-[10px] font-medium tracking-[0.2em] uppercase pointer-events-none select-none">
+        macOS Calculator
       </div>
     </div>
   );

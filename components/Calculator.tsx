@@ -134,16 +134,16 @@ export const Calculator: React.FC = () => {
   }, [handleDigit, handleOperation, handleEquals, handleClear, handleDecimal]);
 
   return (
-    <div className="w-[232px] bg-black/60 backdrop-blur-3xl rounded-xl shadow-2xl border border-white/10 overflow-hidden flex flex-col p-1">
-      <div className="flex gap-1.5 px-3 pt-2 pb-1">
-        <div className="w-2.5 h-2.5 rounded-full bg-[#ff5f56]"></div>
-        <div className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]"></div>
-        <div className="w-2.5 h-2.5 rounded-full bg-[#27c93f]"></div>
+    <div className="w-[232px] bg-[#1c1c1e]/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 overflow-hidden flex flex-col p-[1px]">
+      <div className="flex gap-1.5 px-3 pt-3 pb-1">
+        <div className="w-3 h-3 rounded-full bg-[#ff5f56]"></div>
+        <div className="w-3 h-3 rounded-full bg-[#ffbd2e]"></div>
+        <div className="w-3 h-3 rounded-full bg-[#27c93f]"></div>
       </div>
 
       <Display value={state.display} />
 
-      <div className="grid grid-cols-4 gap-[1px]">
+      <div className="grid grid-cols-4 gap-[1px] bg-white/5">
         <Button label={state.overwrite && state.display === '0' ? 'AC' : 'C'} variant="utility" onClick={handleClear} />
         <Button label="+/-" variant="utility" onClick={handleToggleSign} />
         <Button label="%" variant="utility" onClick={handlePercent} />
