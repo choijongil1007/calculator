@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>macOS Calculator</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔢</text></svg>">
   <style>
     :root {
       --bg-color: #1c1c1e;
@@ -28,10 +27,10 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background: radial-gradient(circle at center, #2c3e50 0%, #000000 100%);
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      overflow: hidden;
+      background: #000;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       color: var(--text-color);
+      user-select: none;
     }
 
     .calculator {
@@ -44,13 +43,6 @@
       display: flex;
       flex-direction: column;
       padding: 1px;
-      animation: fadeIn 0.4s ease-out;
-      user-select: none;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
     }
 
     .header {
@@ -79,7 +71,6 @@
       letter-spacing: -1px;
       white-space: nowrap;
       overflow: hidden;
-      transition: font-size 0.1s ease;
     }
 
     .buttons {
@@ -131,7 +122,6 @@
       text-transform: uppercase;
       letter-spacing: 0.2em;
       color: rgba(255,255,255,0.2);
-      pointer-events: none;
     }
   </style>
 </head>
@@ -173,7 +163,172 @@
     </div>
   </div>
 
-  <div class="footer-text">Pure JS macOS Calculator</div>
+  <div class="footer-text">Pure JavaScript Calculator</div>
 
+  <script>
+    (function() {
+      let displayValue = '0';
+      let firstOperand = null;
+      let waitingForSecondOperand = false;
+      let operator = null;
+
+      const displayElement = document.getElementById('display');
+
+      function updateDisplay() {
+        if (!displayElement) return;
+        
+        let formattedValue = displayValue;
+        if (displayValue !== 'Error' && displayValue !== 'NaN') {
+          const num = parseFloat(displayValue);
+          if (!isNaN(num)) {
+            const parts = displayValue.split('.');
+            const integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            formattedValue = integerPart + (parts.length > 1 ? '.' + parts[1] : '');
+          }
+        }
+
+        displayElement.textContent = formattedValue;
+        
+        // Font size scaling
+        const len = formattedValue.length;
+        if (len <= 6) displayElement.style.fontSize = '48px';
+        else if (len <= 9) displayElement.style.fontSize = '36px';
+        else if (len <= 12) displayElement.style.fontSize = '28px';
+        else displayElement.style.fontSize = '20px';
+
+        const clearBtn = document.getElementById('clear');
+        if (clearBtn) {
+          clearBtn.textContent = (displayValue === '0' && operator === null) ? 'AC' : 'C';
+        }
+      }
+
+      function inputDigit(digit) {
+        if (waitingForSecondOperand) {
+          displayValue = digit;
+          waitingForSecondOperand = false;
+        } else {
+          displayValue = displayValue === '0' ? digit : displayValue + digit;
+        }
+        updateDisplay();
+      }
+
+      function inputDecimal() {
+        if (waitingForSecondOperand) {
+          displayValue = '0.';
+          waitingForSecondOperand = false;
+          updateDisplay();
+          return;
+        }
+        if (!displayValue.includes('.')) {
+          displayValue += '.';
+          updateDisplay();
+        }
+      }
+
+      function handleOperator(nextOperator) {
+        const inputValue = parseFloat(displayValue);
+
+        if (operator && waitingForSecondOperand) {
+          operator = nextOperator;
+          return;
+        }
+
+        if (firstOperand === null && !isNaN(inputValue)) {
+          firstOperand = inputValue;
+        } else if (operator) {
+          const result = calculate(firstOperand, inputValue, operator);
+          displayValue = String(result);
+          firstOperand = result;
+          updateDisplay();
+        }
+
+        waitingForSecondOperand = true;
+        operator = nextOperator;
+      }
+
+      function calculate(first, second, op) {
+        let result;
+        if (op === '+') result = first + second;
+        else if (op === '-') result = first - second;
+        else if (op === '*') result = first * second;
+        else if (op === '/') result = second === 0 ? 'Error' : first / second;
+        else return second;
+
+        if (typeof result === 'number') {
+          return parseFloat(result.toPrecision(12));
+        }
+        return result;
+      }
+
+      function resetCalculator() {
+        displayValue = '0';
+        firstOperand = null;
+        waitingForSecondOperand = false;
+        operator = null;
+        updateDisplay();
+      }
+
+      function toggleSign() {
+        if (displayValue === '0') return;
+        displayValue = displayValue.startsWith('-') ? displayValue.slice(1) : '-' + displayValue;
+        updateDisplay();
+      }
+
+      function inputPercent() {
+        const value = parseFloat(displayValue);
+        displayValue = String(value / 100);
+        updateDisplay();
+      }
+
+      // Button Events
+      document.querySelectorAll('[data-num]').forEach(btn => {
+        btn.addEventListener('click', () => inputDigit(btn.getAttribute('data-num')));
+      });
+
+      document.querySelectorAll('[data-op]').forEach(btn => {
+        btn.addEventListener('click', () => handleOperator(btn.getAttribute('data-op')));
+      });
+
+      document.getElementById('clear').addEventListener('click', resetCalculator);
+      document.getElementById('decimal').addEventListener('click', inputDecimal);
+      document.getElementById('toggle-sign').addEventListener('click', toggleSign);
+      document.getElementById('percent').addEventListener('click', inputPercent);
+      document.getElementById('equals').addEventListener('click', () => {
+        if (operator === null) return;
+        const inputValue = parseFloat(displayValue);
+        const result = calculate(firstOperand, inputValue, operator);
+        displayValue = String(result);
+        firstOperand = null;
+        operator = null;
+        waitingForSecondOperand = true;
+        updateDisplay();
+      });
+
+      // Keyboard Support
+      window.addEventListener('keydown', (e) => {
+        if (e.key >= '0' && e.key <= '9') inputDigit(e.key);
+        if (e.key === '.') inputDecimal();
+        if (e.key === '+') handleOperator('+');
+        if (e.key === '-') handleOperator('-');
+        if (e.key === '*') handleOperator('*');
+        if (e.key === '/') handleOperator('/');
+        if (e.key === 'Enter' || e.key === '=') {
+          document.getElementById('equals').click();
+        }
+        if (e.key === 'Escape') resetCalculator();
+        if (e.key === 'Backspace') {
+          if (displayValue.length > 1) {
+            displayValue = displayValue.slice(0, -1);
+            if (displayValue === '-') displayValue = '0';
+          } else {
+            displayValue = '0';
+          }
+          updateDisplay();
+        }
+      });
+
+      updateDisplay();
+    })();
+  </script>
 </body>
 </html>
